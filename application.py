@@ -2,6 +2,7 @@ import os.path
 
 import engineio.async_gevent
 import eventlet
+import sys
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -38,8 +39,9 @@ class EchoWebSocket(WebSocketHandler):
         print("WebSocket closed")
 
 
+# sio = socketio.AsyncServer(async_mode='tornado', message_queue='redis://172.17.0.2')
 sio = socketio.AsyncServer(async_mode='tornado')
-
+# socketio_app = SocketIO(app, message_queue='redis://{}'.format(app.config['REDIS_IP']))
 
 async def background_task():
     """Example of how to send server generated events to clients."""
@@ -54,17 +56,42 @@ async def background_task():
 
 from threading import Thread
 
-thread = Thread(target=async
-lambda x: await
-background_task())
-thread.start()
+# thread = Thread(target=async
+# lambda x: await
+# background_task())
+# thread.start()
 
 
 @sio.on('my event', namespace='/test')
 async def test_message(sid, message):
     print('test_message', sid, message)
-    await sio.emit('my response', {'data': message['data']}, room=sid,
+    await sio.emit('my response', {'data': "sio.sleep 0"}, room=sid,
                    namespace='/test')
+
+    # await engineio.async_gevent.sleep(5)
+    sio.sleep(5)
+    # await sio.sleep(2)
+    print('test_message after sio.sleep', sid, message)
+
+    await sio.emit('my response', {'data': 'sio.sleep  1'}, room=sid,
+                   namespace='/test')
+    sys.stdout.flush()
+    sio.sleep(5)
+
+
+    await sio.sleep(3)
+    print('test_message after sio.sleep2 ', sid, message)
+
+    await sio.emit('my response', {'data': 'sio.sleep 2'}, room=sid,
+                   namespace='/test')
+    sys.stdout.flush()
+    await sio.sleep(4)
+    print('test_message after sio.sleep 4 ', sid, message)
+
+    await sio.emit('my response', {'data': 'sio.sleep 4'}, room=sid,
+                   namespace='/test')
+
+    # await background_task()
 
 
 @sio.on('disconnect request', namespace='/test')
@@ -105,6 +132,7 @@ if __name__ == '__main__':
         ],
         template_path=os.path.join(os.path.dirname(__file__), "templates")
     )
+    # sio.attach(app)
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
