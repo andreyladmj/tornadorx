@@ -39,8 +39,17 @@ class EchoWebSocket(WebSocketHandler):
         print("WebSocket closed")
 
 
+#https://python-socketio.readthedocs.io/en/latest/
+mgr = socketio.AsyncRedisManager('redis://172.17.0.2')
+# sio = socketio.AsyncServer(client_manager=mgr)
+# mgr = socketio.KombuManager('redis://172.17.0.2')
+print(mgr)
+# sio = socketio.Server(client_manager=mgr)
+
 # sio = socketio.AsyncServer(async_mode='tornado', message_queue='redis://172.17.0.2')
-sio = socketio.AsyncServer(async_mode='tornado')
+# sio = socketio.AsyncServer(async_mode='tornado', client_manager=mgr)
+sio = socketio.AsyncServer(client_manager=mgr)
+print(sio)
 # socketio_app = SocketIO(app, message_queue='redis://{}'.format(app.config['REDIS_IP']))
 
 async def background_task():
@@ -61,6 +70,7 @@ from threading import Thread
 # background_task())
 # thread.start()
 
+from time import sleep
 
 @sio.on('my event', namespace='/test')
 async def test_message(sid, message):
@@ -69,14 +79,14 @@ async def test_message(sid, message):
                    namespace='/test')
 
     # await engineio.async_gevent.sleep(5)
-    sio.sleep(5)
+    await sio.sleep(3)
     # await sio.sleep(2)
     print('test_message after sio.sleep', sid, message)
 
     await sio.emit('my response', {'data': 'sio.sleep  1'}, room=sid,
                    namespace='/test')
     sys.stdout.flush()
-    sio.sleep(5)
+    await sio.sleep(3)
 
 
     await sio.sleep(3)
@@ -135,4 +145,5 @@ if __name__ == '__main__':
     # sio.attach(app)
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(options.port)
+    print('tornado')
     tornado.ioloop.IOLoop.instance().start()
