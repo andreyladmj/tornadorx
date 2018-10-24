@@ -52,6 +52,7 @@ sio = socketio.AsyncServer(client_manager=mgr)
 print(sio)
 # socketio_app = SocketIO(app, message_queue='redis://{}'.format(app.config['REDIS_IP']))
 
+
 async def background_task():
     """Example of how to send server generated events to clients."""
     count = 0
