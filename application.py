@@ -39,70 +39,15 @@ class EchoWebSocket(WebSocketHandler):
         print("WebSocket closed")
 
 
-#https://python-socketio.readthedocs.io/en/latest/
 mgr = socketio.AsyncRedisManager('redis://172.17.0.2')
-# sio = socketio.AsyncServer(client_manager=mgr)
-# mgr = socketio.KombuManager('redis://172.17.0.2')
-print(mgr)
-# sio = socketio.Server(client_manager=mgr)
-
-# sio = socketio.AsyncServer(async_mode='tornado', message_queue='redis://172.17.0.2')
-# sio = socketio.AsyncServer(async_mode='tornado', client_manager=mgr)
 sio = socketio.AsyncServer(client_manager=mgr)
-print(sio)
-# socketio_app = SocketIO(app, message_queue='redis://{}'.format(app.config['REDIS_IP']))
 
-
-async def background_task():
-    """Example of how to send server generated events to clients."""
-    count = 0
-    while True:
-        await sio.sleep(10)
-        count += 1
-        print('background_task')
-        await sio.emit('my response', {'data': 'Server generated event'},
-                       namespace='/test')
-
-
-from threading import Thread
-
-# thread = Thread(target=async
-# lambda x: await
-# background_task())
-# thread.start()
-
-from time import sleep
 
 @sio.on('my event', namespace='/test')
 async def test_message(sid, message):
     print('test_message', sid, message)
     await sio.emit('my response', {'data': "sio.sleep 0"}, room=sid,
                    namespace='/test')
-
-    # await engineio.async_gevent.sleep(5)
-    await sio.sleep(3)
-    # await sio.sleep(2)
-    print('test_message after sio.sleep', sid, message)
-
-    await sio.emit('my response', {'data': 'sio.sleep  1'}, room=sid,
-                   namespace='/test')
-    sys.stdout.flush()
-    await sio.sleep(3)
-
-
-    await sio.sleep(3)
-    print('test_message after sio.sleep2 ', sid, message)
-
-    await sio.emit('my response', {'data': 'sio.sleep 2'}, room=sid,
-                   namespace='/test')
-    sys.stdout.flush()
-    await sio.sleep(4)
-    print('test_message after sio.sleep 4 ', sid, message)
-
-    await sio.emit('my response', {'data': 'sio.sleep 4'}, room=sid,
-                   namespace='/test')
-
-    # await background_task()
 
 
 @sio.on('disconnect request', namespace='/test')
@@ -146,5 +91,4 @@ if __name__ == '__main__':
     # sio.attach(app)
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(options.port)
-    print('tornado')
     tornado.ioloop.IOLoop.instance().start()
