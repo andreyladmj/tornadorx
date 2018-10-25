@@ -24,6 +24,7 @@
     "laravel-elixir-vue-2": "^0.3.0"
   },
   "dependencies": {
-    "vue": "^2.5.16"
+    "vue": "^2.5.16",
+    "vue-router": "^3.0.1"
   }
 }

@@ -9,9 +9,10 @@ import tornado.web
 import socketio
 from tornado.options import define, options
 
-print('init sio')
-mgr = socketio.AsyncRedisManager('redis://172.17.0.2')
-sio = socketio.AsyncServer(async_mode='tornado', client_manager=mgr)
+# print('init sio')
+# mgr = socketio.AsyncRedisManager('redis://172.17.0.2')
+# sio = socketio.AsyncServer(async_mode='tornado', client_manager=mgr)
+sio = socketio.AsyncServer(async_mode='tornado')
 
 from app.handlers import IndexHandler, EchoWebSocket
 
