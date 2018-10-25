@@ -1,6 +1,7 @@
 import tornado.web
 from tornado.websocket import WebSocketHandler
 
+
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('index.html')
