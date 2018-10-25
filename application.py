@@ -13,75 +13,22 @@ import tornado.web
 
 import socketio
 from tornado.options import define, options
-from tornado.websocket import WebSocketHandler
 
-define("port", default=8000, help="run on the given port", type=int)
-
-
-class IndexHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.render('index.html')
-
-
-# https://code-live.ru/post/chat-with-tornado-backbone-and-websockets/
-
-class EchoWebSocket(WebSocketHandler):
-    def get(self):
-        self.render('index.html')
-
-    def open(self):
-        print("WebSocket opened")
-
-    def on_message(self, message):
-        self.write_message(u"You said: " + message)
-
-    def on_close(self):
-        print("WebSocket closed")
-
+from app.handlers import IndexHandler, EchoWebSocket
 
 mgr = socketio.AsyncRedisManager('redis://172.17.0.2')
-sio = socketio.AsyncServer(client_manager=mgr)
+sio = socketio.AsyncServer(async_mode='tornado', client_manager=mgr)
 
 
-@sio.on('my event', namespace='/test')
-async def test_message(sid, message):
-    print('test_message', sid, message)
-    await sio.emit('my response', {'data': "sio.sleep 0"}, room=sid,
-                   namespace='/test')
 
-
-@sio.on('disconnect request', namespace='/test')
-async def disconnect_request(sid):
-    await sio.disconnect(sid, namespace='/test')
-
-
-@sio.on('connect', namespace='/test')
-async def test_connect(sid, environ):
-    await sio.emit('my response', {'data': 'Connected', 'count': 0}, room=sid,
-                   namespace='/test')
-
-
-@sio.on('disconnect', namespace='/test')
-def test_disconnect(sid):
-    print('Client disconnected')
-
-
-class PoemPageHandler(tornado.web.RequestHandler):
-    def post(self):
-        noun1 = self.get_argument('noun1')
-        noun2 = self.get_argument('noun2')
-        verb = self.get_argument('verb')
-        noun3 = self.get_argument('noun3')
-        self.render('poem.html', roads=noun1, wood=noun2, made=verb,
-                    difference=noun3)
-
+import app
 
 if __name__ == '__main__':
+    define("port", default=8000, help="run on the given port", type=int)
     tornado.options.parse_command_line()
     app = tornado.web.Application(
         handlers=[
             (r'/', IndexHandler),
-            (r'/poem', PoemPageHandler),
             (r'/websocket', EchoWebSocket),
             (r"/socket.io/", socketio.get_tornado_handler(sio)),
             (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "./static"},),
