@@ -60,13 +60,14 @@ Vue.component('items-component', ItemsComponents);
 
 
 const Home = {template: '<h1>Home</h1>'};
-const Registration = {template: '<h1>Registration</h1>'};
-const Login = {template: '<h1>Login</h1>'};
+const Registration = {template: '#register-template'};
+const Login = {template: '#login-template'};
+// const Login = {template: require('login.html')};
 
 
 const routes = [
-    { path: '/', component: Registration },
-    { path: '/registration', component: Home },
+    { path: '/', component: Home },
+    { path: '/registration', component: Registration },
     { path: '/login', component: Login }
 ];
 
