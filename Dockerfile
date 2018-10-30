@@ -14,7 +14,7 @@ RUN pip3 install -r requirements.txt
 
 RUN pip3 install --trusted-host 159.69.27.73 --extra-index-url http://159.69.27.73:8089 edusson_ds_main
 
-RUN service mysql start
+#RUN service mysql start
 
 # RUN echo 'test'
 

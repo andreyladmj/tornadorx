@@ -40,83 +40,34 @@ class BasicHandler(tornado.web.RequestHandler):
     def options(self, *args, **kwargs):
         pass
 
+    def write_error(self, status_code, **kwargs):
+        #http://nanvel.name/2014/12/handle-errors-in-tornado-application
 
-class BoardHandler(BasicHandler):
-    def get(self, id):
-        id = int(id)
-        board = DBConnectionsFacade.get_edusson_ds_orm_session().query(DashDashboardBoard).filter_by(
-            board_id=id).first()
+        self.set_header('Content-Type', 'application/json')
+        if self.settings.get("serve_traceback") and "exc_info" in kwargs:
+            # in debug mode, try to send a traceback
+            lines = []
+            for line in traceback.format_exception(*kwargs["exc_info"]):
+                lines.append(line)
+            self.finish(json.dumps({
+                'error': {
+                    'code': status_code,
+                    'message': self._reason,
+                    'traceback': lines,
+                }
+            }))
+        else:
+            self.finish(json.dumps({
+                'error': {
+                    'code': status_code,
+                    'message': self._reason,
+                }
+            }))
 
-        if not board:
-            return self.write(json.dumps({}))
 
-        self.write(json.dumps(to_dict(DashDashboardBoard, board)))
 
-    def put(self, id):
-        json_data = tornado.escape.json_decode(self.request.body)
-        board_id = json_data.get('board_id', None)
-        name = json_data.get('name')
-        model_tag = json_data.get('model_tag')
-        description = json_data.get('description')
 
-        Session = sessionmaker(bind=DBConnectionsFacade.get_edusson_ds())
-        sess = Session()
 
-        board = sess.query(DashDashboardBoard).filter_by(
-            board_id=id).first()
-
-        board.name = name
-        board.model_tag = model_tag
-        board.description = description
-
-        sess.commit()
-
-class BoardsHandler(BasicHandler):
-    def get(self):
-        boards = DBConnectionsFacade.get_edusson_ds_orm_session().query(DashDashboardBoard).all()
-        boards = [to_dict(DashDashboardBoard, board) for board in boards]
-        self.write(json.dumps(boards))
-
-    def post(self):
-        json_data = tornado.escape.json_decode(self.request.body)
-        board_id = json_data.get('board_id', None)
-        name = json_data.get('name')
-        model_tag = json_data.get('model_tag')
-        description = json_data.get('description')
-
-        Session = sessionmaker(bind=DBConnectionsFacade.get_edusson_ds())
-        sess = Session()
-
-        log = DashDashboardBoard(
-            name=name,
-            model_tag=model_tag,
-            description=description
-        )
-        sess.add(log)
-        sess.commit()
-
-class UsersHandler(BasicHandler):
-    def get(self):
-        users = DBConnectionsFacade.get_edusson_ds_orm_session().query(DashUser).all()
-        users = [to_dict(DashUser, user) for user in users]
-        self.write(json.dumps(users))
-
-    def post(self):
-        json_data = tornado.escape.json_decode(self.request.body)
-        username = json_data.get('username')
-        password = json_data.get('password')
-        access_level_id = json_data.get('access_level_id')
-
-        Session = sessionmaker(bind=DBConnectionsFacade.get_edusson_ds())
-        sess = Session()
-
-        user = DashUser(
-            username=username,
-            password=sha256_crypt.encrypt(password),
-            access_level_id=access_level_id
-        )
-        sess.add(user)
-        sess.commit()
 
 
 class PoemPageHandler(tornado.web.RequestHandler):
