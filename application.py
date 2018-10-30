@@ -14,8 +14,7 @@ from tornado.options import define, options
 # sio = socketio.AsyncServer(async_mode='tornado', client_manager=mgr)
 sio = socketio.AsyncServer(async_mode='tornado')
 
-from app.handlers import IndexHandler, EchoWebSocket, BoardsHandler
-
+from app.handlers import IndexHandler, EchoWebSocket, BoardsHandler, BoardHandler
 
 if __name__ == '__main__':
     define("port", default=8000, help="run on the given port", type=int)
@@ -23,7 +22,10 @@ if __name__ == '__main__':
     app = tornado.web.Application(
         handlers=[
             (r'/', IndexHandler),
+            # (r'/board/:id', BoardHandler),
+            (r'/board/([^/]+)', BoardHandler),
             (r'/boards', BoardsHandler),
+            (r'/users', UsersHandler),
             (r'/websocket', EchoWebSocket),
             (r"/socket.io/", socketio.get_tornado_handler(sio)),
             (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "./static"},),

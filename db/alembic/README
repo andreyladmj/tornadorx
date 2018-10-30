@@ -1,0 +1,18 @@
+Generic single-database configuration.
+******************************
+
+Create Migrations
+===================
+# change models
+
+# autogenerate migrations
+- alembic revision --autogenerate -m "Added user table"
+- alembic revision -m "udpate dash users"
+
+# apply migrations
+- alembic upgrade head
+- alembic upgrade +2
+- alembic upgrade ae10+2
+
+# downgrade migrations
+- alembic downgrade -1
