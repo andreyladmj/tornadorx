@@ -3,7 +3,7 @@ import json
 import tornado.web
 import tornado.escape
 from edusson_ds_main.db.connections import DBConnectionsFacade
-from edusson_ds_main.db.models import DashDashboardBoard, DashUser
+from edusson_ds_main.db.models import DashDashboardBoard, DashUser, Base
 from passlib.handlers.sha2_crypt import sha256_crypt
 from sqlalchemy.orm import sessionmaker
 from tornado.websocket import WebSocketHandler
@@ -27,6 +27,9 @@ class EchoWebSocket(WebSocketHandler):
     def on_close(self):
         print("WebSocket closed")
 
+
+class MyAppException(tornado.web.HTTPError):
+    pass
 
 class BasicHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
@@ -80,10 +83,20 @@ class PoemPageHandler(tornado.web.RequestHandler):
                     difference=noun3)
 
 
-def to_dict(cls, obj):
+def to_dict(obj, recursive=True):
     d = {}
-    for i in cls.__dict__:
+    for i in obj.__class__.__dict__:
         if not i.startswith('_'):
-            d[i] = getattr(obj, i)
+            el = getattr(obj, i)
+
+            if isinstance(el, Base) and not recursive:
+                continue
+
+            if isinstance(el, Base) and recursive:
+                d[i] = to_dict(el)
+            elif isinstance(el, list):
+                d[i] = [to_dict(item, False) for item in el]
+            else:
+                d[i] = el
 
     return d

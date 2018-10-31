@@ -2,11 +2,11 @@ FROM python:3.6
 
 RUN apt-get update && apt-get install -y python3-dev uwsgi-plugin-python3 uwsgi-plugin-python mysql-server
 
-EXPOSE 8000
-
 VOLUME /usr/src/app
 
 WORKDIR /usr/src/app
+
+EXPOSE 8000
 
 COPY requirements.txt requirements.txt
 

@@ -18,7 +18,7 @@ class BoardHandler(BasicHandler):
         if not board:
             return self.write(json.dumps({}))
 
-        self.write(json.dumps(to_dict(DashDashboardBoard, board)))
+        self.write(json.dumps(to_dict(board)))
 
     def put(self, id):
         json_data = tornado.escape.json_decode(self.request.body)
@@ -39,10 +39,19 @@ class BoardHandler(BasicHandler):
 
         sess.commit()
 
+    def delete(self, id):
+        print('delete', id)
+        board = DBConnectionsFacade.get_edusson_ds_orm_session().query(DashDashboardBoard).filter_by(
+            board_id=id).first()
+        Session = sessionmaker(bind=DBConnectionsFacade.get_edusson_ds())
+        sess = Session()
+        sess.delete(board)
+        sess.commit()
+
 class BoardsHandler(BasicHandler):
     def get(self):
         boards = DBConnectionsFacade.get_edusson_ds_orm_session().query(DashDashboardBoard).all()
-        boards = [to_dict(DashDashboardBoard, board) for board in boards]
+        boards = [to_dict(board) for board in boards]
         self.write(json.dumps(boards))
 
     def post(self):

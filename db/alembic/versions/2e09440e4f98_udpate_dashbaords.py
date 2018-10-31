@@ -50,6 +50,21 @@ def upgrade():
 
     op.create_index('ix_user_access_board_UNIQUE', 'dash_user_board_access', ['user_id', 'dashboard_id', 'board_id'], unique=True)
 
+    from sqlalchemy.orm import sessionmaker
+    from edusson_ds_main.db.connections import DBConnectionsFacade
+    from edusson_ds_main.db.models import DashDashboardBoard, DashUser
+    Session = sessionmaker(bind=DBConnectionsFacade.get_edusson_ds())
+    sess = Session()
+
+    log1 = DashDashboardBoard(name='test 1',model_tag='test 1',description='test 1')
+    sess.add(log1)
+
+    log2 = DashDashboardBoard(name='test 2',model_tag='test 2',description='test 2')
+    sess.add(log2)
+
+    log3 = DashDashboardBoard(name='test 3',model_tag='test 3',description='test 3')
+    sess.add(log3)
+    sess.commit()
 
 def downgrade():
     op.drop_index('ix_user_access_board_UNIQUE', 'dash_user_board_access')
