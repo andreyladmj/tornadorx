@@ -21,9 +21,9 @@ from app.handlers import IndexHandler, EchoWebSocket
 
 if __name__ == '__main__':
 
-    # from edusson_ds_main.db.connections import DBConnectionsFacade, DB_EDUSSON_DS
-    # DB_EDUSSON_DS.set_static_connection(pool_recycle=500, pool_size=10, max_overflow=0, engine='mysql+pymysql',
-    #                                     host='159.69.44.90', db='edusson_ds_write', user='root', passwd='')
+    from edusson_ds_main.db.connections import DBConnectionsFacade, DB_EDUSSON_DS
+    DB_EDUSSON_DS.set_static_connection(pool_recycle=500, pool_size=10, max_overflow=0, engine='mysql+pymysql',
+                                        host='159.69.44.90', db='edusson_tmp_boards', user='root', passwd='')
 
     define("port", default=8000, help="run on the given port", type=int)
     tornado.options.parse_command_line()

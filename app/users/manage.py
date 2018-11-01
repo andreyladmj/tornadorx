@@ -23,7 +23,7 @@ dashboard_id = 1
 
 class UsersHandler(BasicHandler):
     def get(self):
-        users = DBConnectionsFacade.get_edusson_ds_orm_session().query(DashUser).all()
+        users = DBConnectionsFacade.get_edusson_ds_orm_session().query(DashUser).order_by(DashUser.user_id).all()
         users = [to_dict(user) for user in users]
         self.write(json.dumps(users))
 
@@ -73,6 +73,7 @@ class UserHandler(BasicHandler):
             raise MyAppException(reason='User cannot be found', status_code=400)
 
         user = to_dict(user)
+        user['password'] = ''
         user['boards'] = list(map(lambda x: x['board_id'], user['boards']))
 
         self.write(json.dumps(user))
@@ -83,6 +84,7 @@ class UserHandler(BasicHandler):
         password = json_data.get('password', None)
         boards = json_data.get('boards', [])
         access_level_id = json_data.get('access_level_id', None)
+        is_active = json_data.get('is_active', True)
 
         sess = sessionmaker(bind=DBConnectionsFacade.get_edusson_ds())()
 
@@ -107,6 +109,7 @@ class UserHandler(BasicHandler):
                 user.boards.append(board_access)
 
         user.username = username
+        user.is_active = is_active
 
         if password:
             user.password = password

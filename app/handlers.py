@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 import tornado.web
 import tornado.escape
@@ -96,6 +97,8 @@ def to_dict(obj, recursive=True):
                 d[i] = to_dict(el)
             elif isinstance(el, list):
                 d[i] = [to_dict(item, False) for item in el]
+            elif isinstance(el, datetime):
+                d[i] = el.strftime("%Y-%m-%d %H:%M:%S")
             else:
                 d[i] = el
 

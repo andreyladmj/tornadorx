@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 import tornado.escape
 from sqlalchemy.orm import sessionmaker
@@ -40,7 +41,6 @@ class BoardHandler(BasicHandler):
         sess.commit()
 
     def delete(self, id):
-        print('delete', id)
         board = DBConnectionsFacade.get_edusson_ds_orm_session().query(DashDashboardBoard).filter_by(
             board_id=id).first()
         Session = sessionmaker(bind=DBConnectionsFacade.get_edusson_ds())
@@ -67,7 +67,8 @@ class BoardsHandler(BasicHandler):
         log = DashDashboardBoard(
             name=name,
             model_tag=model_tag,
-            description=description
+            description=description,
+            date_created=datetime.utcnow(),
         )
         sess.add(log)
         sess.commit()
