@@ -2,9 +2,9 @@ FROM python:3.6
 
 RUN apt-get update && apt-get install -y python3-dev uwsgi-plugin-python3 uwsgi-plugin-python mysql-server
 
-VOLUME /usr/src/app
-
 WORKDIR /usr/src/app
+
+VOLUME /usr/src/app
 
 EXPOSE 8000
 
@@ -22,6 +22,6 @@ COPY . .
 
 RUN chmod 777 db/run.sh
 
-RUN bash db/run.sh
+# RUN bash db/run.sh
 
 CMD [ "python3", "application.py" ]

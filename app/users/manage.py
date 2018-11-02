@@ -19,7 +19,7 @@ import tornado.web
 #                    namespace='/test')
 
 
-dashboard_id = 1
+dashboard_id = 2
 
 class UsersHandler(BasicHandler):
     def get(self):
@@ -97,7 +97,11 @@ class UserHandler(BasicHandler):
             exists_ids.append(board_access.board_id)
 
             if board_access.board_id not in boards:
-                sess.delete(board_access)
+                sess.query(DashUserBoardAccess).filter_by(
+                    user_id=id,
+                    dashboard_id=dashboard_id,
+                    board_id=board_access.board_id
+                ).delete()
 
         for board_id in boards:
             if board_id not in exists_ids:
