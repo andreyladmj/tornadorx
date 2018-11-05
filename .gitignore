@@ -2,3 +2,5 @@
 node_modules/
 static/
 package-lock.json
+.benchmarks
+.pytest_cache

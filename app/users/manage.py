@@ -17,9 +17,9 @@ import tornado.web
 #     print('test_message', sid, message)
 #     await application.sio.emit('my response', {'data': "sio.sleep 0"}, room=sid,
 #                    namespace='/test')
+from app.repositories.repository import Repository
+from app.utils import get_analytic_dashboard
 
-
-dashboard_id = 2
 
 class UsersHandler(BasicHandler):
     def get(self):
@@ -53,7 +53,7 @@ class UsersHandler(BasicHandler):
         for board_id in boards:
             board_access = DashUserBoardAccess(
                 user=user,
-                dashboard_id=dashboard_id,
+                dashboard_id=get_analytic_dashboard(),
                 board_id=board_id
             )
             user.boards.append(board_access)
@@ -74,6 +74,7 @@ class UserHandler(BasicHandler):
 
         user = to_dict(user)
         user['password'] = ''
+        user['boards'] = filter(lambda x: x['dashboard_id'] == get_analytic_dashboard(), user['boards'])
         user['boards'] = list(map(lambda x: x['board_id'], user['boards']))
 
         self.write(json.dumps(user))
@@ -90,7 +91,7 @@ class UserHandler(BasicHandler):
 
         user = sess.query(DashUser).filter_by(user_id=id).first()
 
-        user_board_accesses = sess.query(DashUserBoardAccess).filter_by(user_id=id, dashboard_id=dashboard_id).all()
+        user_board_accesses = sess.query(DashUserBoardAccess).filter_by(user_id=id, dashboard_id=get_analytic_dashboard()).all()
 
         exists_ids = []
         for board_access in user_board_accesses:
@@ -99,7 +100,7 @@ class UserHandler(BasicHandler):
             if board_access.board_id not in boards:
                 sess.query(DashUserBoardAccess).filter_by(
                     user_id=id,
-                    dashboard_id=dashboard_id,
+                    dashboard_id=get_analytic_dashboard(),
                     board_id=board_access.board_id
                 ).delete()
 
@@ -107,7 +108,7 @@ class UserHandler(BasicHandler):
             if board_id not in exists_ids:
                 board_access = DashUserBoardAccess(
                     user=user,
-                    dashboard_id=dashboard_id,
+                    dashboard_id=get_analytic_dashboard(),
                     board_id=board_id
                 )
                 user.boards.append(board_access)
@@ -116,7 +117,7 @@ class UserHandler(BasicHandler):
         user.is_active = is_active
 
         if password:
-            user.password = password
+            user.password = sha256_crypt.encrypt(password)
 
         if access_level_id:
             user.access_level_id = access_level_id
@@ -124,7 +125,6 @@ class UserHandler(BasicHandler):
         sess.commit()
 
     def delete(self, id):
-        print('delete', id)
         user = DBConnectionsFacade.get_edusson_ds_orm_session().query(DashUser).filter_by(
             user_id=id).first()
         Session = sessionmaker(bind=DBConnectionsFacade.get_edusson_ds())
